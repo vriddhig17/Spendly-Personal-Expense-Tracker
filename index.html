@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spendly</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="loading">Loading...</div>
+
+<div id="auth-page" style="display:none">
+  <div class="auth-center">
+    <div class="logo">💰 Spendly</div>
+    <p class="logo-sub">Personal Finance Tracker</p>
+    <div class="card" style="width:340px">
+      <h2 id="auth-title">Sign In</h2>
+      <label>Email</label>
+      <input type="email" id="auth-email" placeholder="you@email.com">
+      <label>Password</label>
+      <input type="password" id="auth-pass" placeholder="Min 6 characters">
+      <div id="auth-err" class="err"></div>
+      <button id="auth-btn" class="btn-primary">Sign In</button>
+      <p class="switch"><span id="sw-label">No account?</span> <a id="sw-link">Sign Up</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+
+  <aside id="sidebar">
+    <div class="logo small">💰 Spendly</div>
+
+    <nav>
+      <button class="nav-item active" id="nav-dash"     onclick="goto('dash')">📊 Dashboard</button>
+      <button class="nav-item"        id="nav-add"      onclick="goto('add')">➕ Add Entry</button>
+      <button class="nav-item"        id="nav-table"    onclick="goto('table')">🗂 All Records</button>
+    </nav>
+
+    <div class="sidebar-section">
+      <p class="section-title">Category Spending</p>
+      <canvas id="donut-chart" width="160" height="160"></canvas>
+      <div id="legend"></div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <span id="user-tag"></span>
+      <button onclick="doLogout()" class="btn-logout">Logout</button>
+    </div>
+  </aside>
+
+  <main id="main">
+
+    <div class="topbar">
+      <div class="month-row">
+        <button class="arrow-btn" onclick="changeMonth(-1)">‹</button>
+        <h2 id="month-label">April 2026</h2>
+        <button class="arrow-btn" onclick="changeMonth(1)">›</button>
+      </div>
+      <div id="user-tag2"></div>
+    </div>
+
+    <div id="page-dash" class="page">
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-top">Total Transactions <span class="icon">↕</span></div>
+          <div class="stat-val white" id="s-count">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">Total Income <span class="icon green">↗</span></div>
+          <div class="stat-val green" id="s-income">₹0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">Total Expense <span class="icon red">↘</span></div>
+          <div class="stat-val red" id="s-expense">₹0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">Net Cash Flow <span class="icon">↕</span></div>
+          <div class="stat-val green" id="s-net">₹0</div>
+        </div>
+      </div>
+
+      <div class="tables-row">
+
+        <div class="card">
+          <div class="table-head">
+            <span class="table-tag green-tag">📋 Income</span>
+            <button class="btn-new" onclick="goto('add')">+ New</button>
+          </div>
+          <table>
+            <thead><tr><th>Name</th><th>Date</th><th>Amount</th><th>Category</th><th></th></tr></thead>
+            <tbody id="income-tbody"><tr><td colspan="5" class="empty">No income yet</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="table-head">
+            <span class="table-tag red-tag">📋 Expenses</span>
+            <button class="btn-new" onclick="goto('add')">+ New</button>
+          </div>
+          <table>
+            <thead><tr><th>Name</th><th>Date</th><th>Amount</th><th>Category</th><th>Payment</th><th></th></tr></thead>
+            <tbody id="expense-tbody"><tr><td colspan="6" class="empty">No expenses yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h3>Monthly Breakdown</h3>
+        <canvas id="bar-chart" height="80"></canvas>
+      </div>
+
+    </div>
+
+    <div id="page-add" class="page" style="display:none">
+      <div class="card" style="max-width:480px">
+        <h2>Add New Entry</h2>
+
+        <div class="type-toggle">
+          <button id="type-expense" class="type-btn active" onclick="setType('expense')">💸 Expense</button>
+          <button id="type-income"  class="type-btn"        onclick="setType('income')">💰 Income</button>
+        </div>
+
+        <label>Description</label>
+        <input type="text" id="f-desc" placeholder="e.g. Grocery at DMart" maxlength="60">
+
+        <label>Amount (₹)</label>
+        <input type="number" id="f-amount" placeholder="500" min="1">
+
+        <label>Date</label>
+        <input type="date" id="f-date">
+
+        <label>Category</label>
+        <select id="f-cat">
+          <option value="">-- Select --</option>
+          <option>🍜 Food</option>
+          <option>🚌 Transport</option>
+          <option>🛍 Shopping</option>
+          <option>💊 Health</option>
+          <option>⚡ Bills</option>
+          <option>🎬 Entertainment</option>
+          <option>📚 Education</option>
+          <option>💼 Salary</option>
+          <option>💡 Freelance</option>
+          <option>📦 Other</option>
+        </select>
+
+        <div id="pay-section">
+          <label>Payment Type</label>
+          <div class="pay-toggle">
+            <button id="pay-online" class="pay-btn active" onclick="setPayType('Online')">💳 Online</button>
+            <button id="pay-cash"   class="pay-btn"        onclick="setPayType('Cash')">💵 Cash</button>
+          </div>
+        </div>
+
+        <button onclick="addEntry()" class="btn-primary" style="margin-top:14px">✓ Save Entry</button>
+      </div>
+    </div>
+
+    <div id="page-table" class="page" style="display:none">
+      <div class="card">
+        <div class="table-head">
+          <h3>All Records — <span id="month-label-3"></span></h3>
+          <div style="display:flex;gap:8px">
+            <select id="tf-type" onchange="renderFullTable()">
+              <option value="">All Types</option>
+              <option value="expense">Expenses</option>
+              <option value="income">Income</option>
+            </select>
+            <select id="tf-pay" onchange="renderFullTable()">
+              <option value="">All Payments</option>
+              <option value="Online">💳 Online</option>
+              <option value="Cash">💵 Cash</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="summary-bar" id="table-summary"></div>
+
+        <table id="full-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Date</th><th>Description</th>
+              <th>Category</th><th>Type</th><th>Payment</th><th>Amount</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="full-tbody"></tbody>
+          <tfoot id="full-tfoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
